@@ -1,4 +1,4 @@
-package br.com.alura.wm.chatbot;
+package br.com.wm.ecomart.chatbot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
