@@ -3,6 +3,7 @@ package br.com.wm.ecomart.chatbot.web.controller;
 import br.com.wm.ecomart.chatbot.domain.service.ChatbotService;
 import br.com.wm.ecomart.chatbot.web.dto.PerguntaDto;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.thymeleaf.engine.TemplateManager;
@@ -20,7 +21,11 @@ public class ChatController {
     }
 
     @GetMapping
-    public String carregarPaginaChatbot() {
+    public String carregarPaginaChatbot(Model model) {
+        var mensagens = service.carregarHistorico();
+
+        model.addAttribute("historico", mensagens);
+
         return PAGINA_CHAT;
     }
 
@@ -32,7 +37,8 @@ public class ChatController {
 
     @GetMapping("limpar")
     public String limparConversa() {
-        return PAGINA_CHAT;
+        service.limparHistorico();
+        return "redirect:/chat";
     }
 
 }

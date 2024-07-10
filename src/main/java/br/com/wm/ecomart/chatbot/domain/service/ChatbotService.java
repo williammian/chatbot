@@ -6,6 +6,8 @@ import com.theokanning.openai.completion.chat.ChatCompletionChunk;
 import io.reactivex.Flowable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ChatbotService {
 
@@ -19,5 +21,13 @@ public class ChatbotService {
         var promptSistema = "Você é um chatbot de atendimento a clientes de um ecommerce e deve responder apenas perguntas relacionadas com o ecommerce";
         var dados = new DadosRequisicaoChatCompletion(promptSistema, pergunta);
         return client.enviarRequisicaoChatCompletion(dados);
+    }
+
+    public List<String> carregarHistorico() {
+        return client.carregarHistoricoDeMensagens();
+    }
+
+    public void limparHistorico() {
+        client.apagarThread();
     }
 }
