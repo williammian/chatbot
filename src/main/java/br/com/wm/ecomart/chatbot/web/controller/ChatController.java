@@ -5,8 +5,6 @@ import br.com.wm.ecomart.chatbot.web.dto.PerguntaDto;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
-import org.thymeleaf.engine.TemplateManager;
 
 @Controller
 @RequestMapping({"/", "chat"})
@@ -14,7 +12,7 @@ public class ChatController {
 
     private static final String PAGINA_CHAT = "chat";
 
-    private ChatbotService service;
+    private final ChatbotService service;
 
     public ChatController(ChatbotService service) {
         this.service = service;

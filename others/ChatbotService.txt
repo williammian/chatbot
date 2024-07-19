@@ -1,11 +1,3 @@
-package br.com.wm.ecomart.chatbot.domain.service;
-
-import br.com.wm.ecomart.chatbot.infra.openai.DadosRequisicaoChatCompletion;
-import br.com.wm.ecomart.chatbot.infra.openai.OpenAIClient;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
 @Service
 public class ChatbotService {
 

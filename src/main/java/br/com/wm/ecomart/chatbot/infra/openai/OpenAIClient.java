@@ -3,8 +3,8 @@ package br.com.wm.ecomart.chatbot.infra.openai;
 import br.com.wm.ecomart.chatbot.domain.DadosCalculoFrete;
 import br.com.wm.ecomart.chatbot.domain.service.CalculadorDeFrete;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.theokanning.openai.OpenAiHttpException;
 import com.theokanning.openai.completion.chat.*;
+import com.theokanning.openai.file.File;
 import com.theokanning.openai.messages.Message;
 import com.theokanning.openai.messages.MessageRequest;
 import com.theokanning.openai.runs.Run;
@@ -14,7 +14,6 @@ import com.theokanning.openai.runs.SubmitToolOutputsRequest;
 import com.theokanning.openai.service.FunctionExecutor;
 import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.ThreadRequest;
-import io.reactivex.Flowable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -42,11 +41,23 @@ public class OpenAIClient {
     }
 
     public String enviarRequisicaoChatCompletion(DadosRequisicaoChatCompletion dados) {
+        List<String> fileIds = service.listFiles().stream()
+                .map(File::getId)
+                .toList();
+
+        System.out.println("\n");
+        System.out.println("File ids: " + fileIds);
+
         var messageRequest = MessageRequest
                 .builder()
                 .role(ChatMessageRole.USER.value())
                 .content(dados.promptUsuario())
+                .fileIds(fileIds)
                 .build();
+
+        System.out.println("Assistant id: " + this.assistantId);
+
+        System.out.println("Thread id: " + this.threadId);
 
         if (this.threadId == null) {
             var threadRequest = ThreadRequest
@@ -55,10 +66,19 @@ public class OpenAIClient {
                     .build();
 
             var thread = service.createThread(threadRequest);
+
             this.threadId = thread.getId();
+
+            try {
+                Thread.sleep(1000 * 3);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             service.createMessage(this.threadId, messageRequest);
         }
+
+        System.out.println("Thread id: " + this.threadId);
 
         var runRequest = RunCreateRequest
                 .builder()
@@ -131,53 +151,6 @@ public class OpenAIClient {
             throw new RuntimeException(e);
         }
     }
-
-    /* knowledge retrieval ... não funcionando... A.4
-    public String enviarRequisicaoChatCompletion(DadosRequisicaoChatCompletion dados) {
-        var messageRequest = MessageRequest
-                .builder()
-                .role(ChatMessageRole.USER.value())
-                .content(dados.promptUsuario())
-                .build();
-
-        if (this.threadId == null) {
-            var threadRequest = ThreadRequest
-                    .builder()
-                    .messages(Arrays.asList(messageRequest))
-                    .build();
-
-            var thread = service.createThread(threadRequest);
-            this.threadId = thread.getId();
-        } else {
-            service.createMessage(this.threadId, messageRequest);
-        }
-
-        var runRequest = RunCreateRequest
-                .builder()
-                .assistantId(assistantId)
-                .build();
-        var run = service.createRun(threadId, runRequest);
-
-        try {
-            while (!run.getStatus().equalsIgnoreCase("completed")) {
-                Thread.sleep(1000 * 10);
-                run = service.retrieveRun(threadId, run.getId());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        var mensagens = service.listMessages(threadId);
-        var respostaAssistente = mensagens
-                .getData()
-                .stream()
-                .sorted(Comparator.comparingInt(Message::getCreatedAt).reversed())
-                .findFirst().get().getContent().get(0).getText()
-                .getValue().replaceAll("\\\u3010.*?\\\u3011", "");
-
-        return respostaAssistente;
-    }
-     */
 
     public List<String> carregarHistoricoDeMensagens() {
         var mensagens = new ArrayList<String>();
